@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Verification Disbursement</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        /*
+        * === General and Page Layout Styles ===
+        */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #eef2f3 0%, #8e9eab 100%);
+            color: #2c3e50;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            line-height: 1.6;
+        }
+
+        .page-section {
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+            animation: fadeIn 0.5s ease-in-out;
+            width: 100%;
+            max-width: 900px;
+            text-align: center;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to  { opacity: 1; transform: translateY(0); }
+        }
+
+        .container {
+            width: 100%;
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            box-sizing: border-box;
+            transition: all 0.3s ease-in-out;
+        }
+        
+        #login-container { max-width: 400px; }
+
+        /*
+        * === Typography and Headings ===
+        */
+        h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #34495e;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        h2 {
+            font-size: 1.8em;
+            font-weight: 600;
+            color: #2c3e50;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        h3 {
+            font-size: 1.4em;
+            font-weight: 600;
+            color: #3498db;
+            margin-bottom: 15px;
+        }
+
+        .subtitle {
+            font-size: 1em;
+            color: #7f8c8d;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        /*
+        * === BUTTONS ===
+        */
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .role-btn {
+            border: none;
+            cursor: pointer;
+            border-radius: 12px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            padding: 22px;
+            font-size: 1.3em;
+            color: #fff;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+        }
+
+        .role-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        #beneficiary-btn { background-color: #27ae60; }
+        #beneficiary-btn:hover { background-color: #229954; }
+        #Manager-btn { background-color: #3498db; }
+        #Manager-btn:hover { background-color: #2980b9; }
+        #state-agency-btn { background-color: #e67e22; }
+        #state-agency-btn:hover { background-color: #d35400; }
+        
+        .login-btn {
+            width: 100%;
+            padding: 18px;
+            background-color: #2563eb;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .login-btn:hover {
+            background-color: #1e40af;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        .login-btn:disabled {
+            background-color: #94a3b8;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        /*
+        * === FORM ELEMENTS ===
+        */
+        input, select, textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1em;
+            background-color: #f8fafc;
+            box-sizing: border-box;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            margin-bottom: 15px;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
+        }
+        
+        .form-section {
+            margin-bottom: 40px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 30px;
+        }
+        .form-section:last-of-type {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+        }
+        @media (min-width: 550px) {
+            .form-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+        }
+        label {
+            font-size: 0.95em;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #475569;
+        }
+        
+        /* === Login Page Styles === */
+        #Manager-login-page .container, #beneficiary-login-page .container, #agency-login-page .container {
+            max-width: 400px;
+        }
+
+        /* === Upload Page Styles === */
+        .upload-options {
+            display: flex;
+            justify-content: space-around;
+            gap: 15px;
+        }
+        .upload-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            flex-grow: 1;
+            transition: background-color 0.3s;
+        }
+        .upload-btn:hover { background-color: #3e8e41; }
+        
+        /* ENHANCED CAMERA BUTTON STYLE */
+        .primary-camera-btn { 
+            background-color: #e74c3c; /* Red for emphasis */
+            font-size: 1.1em;
+            padding: 15px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .primary-camera-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .upload-btn-secondary { background-color: #2196F3; }
+        .upload-btn-secondary:hover { background-color: #1a7bb3; }
+        
+        #mediaInput, #documentInput { display: none; }
+        
+        #media-preview {
+            display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; justify-content: center;
+        }
+        #media-preview img, #media-preview video {
+            max-width: 100px; height: auto; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .status-message { margin-top: 15px; font-size: 0.9em; font-weight: 500; }
+        .status-ok { color: #10b981; }
+        .status-error { color: #ef4444; }
+
+        /* === Manager Dashboard Styles === */
+        .dashboard-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; width: 100%;
+        }
+        .dashboard-card {
+            background-color: #fcfcfc; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); text-align: left;
+        }
+        .dashboard-card h3 { margin-bottom: 15px; }
+        #submissions-table {
+            width: 100%; border-collapse: collapse; font-size: 0.9em;
+        }
+        #submissions-table th, #submissions-table td {
+            padding: 12px; border-bottom: 1px solid #eee; text-align: left;
+        }
+        #submissions-table th { background-color: #f9f9f9; font-weight: 600; }
+        .action-btn {
+            padding: 5px 10px; font-size: 0.9em; border-radius: 5px; margin-right: 5px; border: none;
+        }
+        .btn-view { background-color: #2196F3; color: white;}
+        .btn-view:hover { background-color: #1a7bb3; }
+        .btn-approve { background-color: #4CAF50; color: white;}
+        .btn-approve:hover { background-color: #3e8e41; }
+        .btn-reject { background-color: #F44336; color: white;}
+        .btn-reject:hover { background-color: #d32f2f; }
+        .btn-delete { background-color: #95a5a6; color: white;}
+        .btn-delete:hover { background-color: #7f8c8d; }
+        .status-pill {
+            display: inline-block; padding: 4px 8px; border-radius: 12px; font-weight: 600; font-size: 0.8em;
+        }
+        .status-pill.status-pending { background-color: #f1c40f; color: #fff; }
+        .status-pill.status-approved { background-color: #2ecc71; color: #fff; }
+        .status-pill.status-rejected { background-color: #e74c3c; color: #fff; }
+        
+        .modal {
+            display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); animation: modalFadeIn 0.3s;
+        }
+        @keyframes modalFadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .modal-content {
+            background-color: #fefefe; margin: 5% auto; padding: 30px; border-radius: 12px; width: 90%; max-width: 600px; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.3); text-align: left;
+        }
+        .close-btn {
+            color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; position: absolute; top: 10px; right: 20px;
+        }
+        .close-btn:hover, .close-btn:focus { color: #333; }
+        
+        .modal-body-content p { margin: 8px 0; }
+        .modal-body-content strong { color: #333; }
+        .modal-media-preview img, .modal-media-preview video {
+            max-width: 100%; height: auto; border-radius: 8px; margin-top: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .review-actions textarea { margin-top: 15px; }
+        .review-actions-btn-group { display: flex; gap: 10px; margin-top: 10px; }
+        
+        /* === State Agency Dashboard Styles === */
+        #agency-dashboard { max-width: 1200px; }
+        .export-btn {
+            background-color: #28a745; color: #fff; padding: 10px 20px; margin-top: 20px; border: none; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer; transition: background-color 0.2s;
+        }
+        .export-btn:hover { background-color: #218838; }
+        #agency-table-container { overflow-x: auto; margin-top: 20px; }
+        #all-submissions-table {
+            width: 100%; border-collapse: collapse; font-size: 0.9em;
+        }
+        #all-submissions-table th, #all-submissions-table td {
+            padding: 12px; border-bottom: 1px solid #eee; text-align: left;
+        }
+        #all-submissions-table th { background-color: #f9f9f9; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+<div id="role-page" class="page-section" style="display:flex;">
+    <div class="container">
+        <h1>Welcome to the Loan App</h1>
+        <p class="subtitle">Please select your role to proceed with the verification process.</p>
+        <div class="button-group">
+            <button id="beneficiary-btn" class="role-btn" onclick="selectRole('beneficiary')">Beneficiary</button>
+            <button id="Manager-btn" class="role-btn" onclick="selectRole('Manager')">Manager</button>
+            <button id="state-agency-btn" class="role-btn" onclick="selectRole('state-agency')">State Agency/Bank</button>
+        </div>
+    </div>
+</div>
+
+<div id="beneficiary-login-page" class="page-section">
+    <div class="container" id="login-container">
+        <h1>Beneficiary Login</h1>
+        <p class="subtitle">Enter your mobile number to receive an OTP.</p>
+        <form id="beneficiary-login-form">
+            <div class="form-field" id="mobile-field">
+                <label for="mobileLogin">Mobile Number</label>
+                <input type="tel" id="mobileLogin" placeholder="Enter registered mobile number" required>
+                <button type="button" class="login-btn" id="send-otp-btn" onclick="sendDemoOTP()">Send OTP</button>
+            </div>
+            <div class="form-field" id="otp-field" style="display:none;">
+                <label for="otpInput">One-Time Password (OTP)</label>
+                <input type="text" id="otpInput" placeholder="Enter 4-digit OTP" required>
+                <button type="submit" class="login-btn">Verify OTP & Login</button>
+            </div>
+        </form>
+        <p class="status-message" id="otp-message" style="margin-top: 15px;"></p>
+    </div>
+</div>
+<div id="profile-page" class="page-section">
+    <div class="container">
+        <h1>Complete Your Profile</h1>
+        <p class="subtitle">Please provide the following details to get started with your loan verification.</p>
+        
+        <form id="profile-form">
+            <div class="form-section">
+                <h3 class="form-section-title">Personal Details</h3>
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label for="fullName">Full Name</label>
+                        <input type="text" id="fullName" placeholder="Enter full name" required aria-label="Full Name">
+                    </div>
+                    <div class="form-field">
+                        <label for="mobileNumber">Mobile Number</label>
+                        <input type="tel" id="mobileNumber" placeholder="Enter mobile number" required aria-label="Mobile Number">
+                    </div>
+                    <div class="form-field">
+                        <label for="governmentID">Government-issued ID</label>
+                        <input type="text" id="governmentID" placeholder="Aadhaar, Voter ID, etc." required aria-label="Government ID">
+                    </div>
+                    <div class="form-field">
+                        <label for="aadharCard">Aadhaar Card No.</label>
+                        <input type="text" id="aadharCard" placeholder="Enter Aadhaar number" required aria-label="Aadhaar Card No.">
+                    </div>
+                    <div class="form-field">
+                        <label for="panCard">PAN Card No.</label>
+                        <input type="text" id="panCard" placeholder="Enter PAN number" required aria-label="PAN Card No.">
+                    </div>
+                    <div class="form-field">
+                        <label for="gender">Gender</label>
+                        <select id="gender" required aria-label="Gender">
+                            <option value="" disabled selected>Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label for="dob">Date of Birth</label>
+                        <input type="date" id="dob" required aria-label="Date of Birth">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="form-section-title">Address Details</h3>
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label for="village">Village/Town</label>
+                        <input type="text" id="village" placeholder="Enter Village or Town" required aria-label="Village/Town">
+                    </div>
+                    <div class="form-field">
+                        <label for="district">District</label>
+                        <input type="text" id="district" placeholder="Enter District" required aria-label="District">
+                    </div>
+                    <div class="form-field">
+                        <label for="state">State</label>
+                        <input type="text" id="state" placeholder="Enter State" required aria-label="State">
+                    </div>
+                    <div class="form-field">
+                        <label for="pincode">PIN code</label>
+                        <input type="number" id="pincode" placeholder="Enter PIN code" required aria-label="PIN code">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h3 class="form-section-title">Bank Details</h3>
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label for="bankName">Bank Name</label>
+                        <input type="text" id="bankName" placeholder="e.g., State Bank of India" required aria-label="Bank Name">
+                    </div>
+                    <div class="form-field">
+                        <label for="ifscCode">IFSC Code</label>
+                        <input type="text" id="ifscCode" placeholder="e.g., SBIN0001234" required aria-label="IFSC Code">
+                    </div>
+                    <div class="form-field">
+                        <label for="branchName">Branch</label>
+                        <input type="text" id="branchName" placeholder="e.g., Koothampoondi" required aria-label="Branch Name">
+                    </div>
+                    <div class="form-field">
+                        <label for="bankPincode">PIN Code</label>
+                        <input type="number" id="bankPincode" placeholder="Enter branch PIN code" required aria-label="Bank PIN code">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button type="submit" class="login-btn">Submit & Continue</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="Manager-login-page" class="page-section">
+    <div class="container" id="login-container">
+        <h1>Manager Login</h1>
+        <p class="subtitle">Enter your credentials to access the dashboard.</p>
+        <form id="Manager-login-form">
+            <div class="form-field">
+                <label for="ManagerUsername">Username</label>
+                <input type="text" id="ManagerUsername" placeholder="Enter username" required>
+            </div>
+            <div class="form-field">
+                <label for="ManagerPassword">Password</label>
+                <input type="password" id="ManagerPassword" placeholder="Enter password" required>
+            </div>
+            <button type="submit" class="login-btn">Log In</button>
+        </form>
+    </div>
+</div>
+
+<div id="state-agency-login-page" class="page-section">
+    <div class="container" id="login-container">
+        <h1>Agency/Bank Login</h1>
+        <p class="subtitle">Enter your credentials to access the agency dashboard.</p>
+        <form id="agency-login-form">
+            <div class="form-field">
+                <label for="agencyUsername">Username</label>
+                <input type="text" id="agencyUsername" placeholder="Enter username" required>
+            </div>
+            <div class="form-field">
+                <label for="agencyPassword">Password</label>
+                <input type="password" id="agencyPassword" placeholder="Enter password" required>
+            </div>
+            <button type="submit" class="login-btn">Log In</button>
+        </form>
+    </div>
+</div>
+
+<div id="upload-page" class="page-section">
+    <div class="container">
+        <h1>Upload Loan Asset</h1>
+        <p class="subtitle">Upload photos or videos of the asset purchased with your loan.</p>
+        
+        <form id="upload-form">
+            <div class="form-section">
+                <h3 class="form-section-title">Asset Details</h3>
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label for="assetType">Asset Type</label>
+                        <select id="assetType" required>
+                            <option value="" disabled selected>Select Asset Type</option>
+                            <option value="Tractor">Tractor</option>
+                            <option value="Livestock">Livestock</option>
+                            <option value="Equipment">Equipment</option>
+                            <option value="Construction">Construction</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-field" style="grid-column: 1 / -1;">
+                        <label for="assetDescription">Description of Asset</label>
+                        <textarea id="assetDescription" rows="4" placeholder="e.g., Brand new Mahindra tractor with plow attachment." required></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="form-section-title">Media Upload</h3>
+                <div class="form-field">
+                    <div class="upload-options">
+                        <button type="button" class="upload-btn primary-camera-btn" onclick="captureMedia()" title="Take Photo/Video with location data">
+                            <i class="fas fa-camera"></i> Take Photo / Video
+                        </button>
+                        <label for="mediaInput" class="upload-btn upload-btn-secondary">Choose from Gallery</label>
+                    </div>
+                    <input type="file" id="mediaInput" accept="image/*,video/mp4" multiple capture="environment">
+                </div>
+                <div id="media-preview"></div>
+                <p class="status-message" id="location-status">GPS initializing...</p>
+            </div>
+            
+            <div class="form-section">
+                <h3 class="form-section-title">Optional Documents</h3>
+                <div class="form-field">
+                    <label for="documentInput" class="upload-btn upload-btn-secondary">Choose Documents</label>
+                    <input type="file" id="documentInput" accept=".pdf,image/*" multiple>
+                </div>
+                <div id="document-preview"></div>
+            </div>
+            
+            <div class="button-group">
+                <button type="submit" class="login-btn" id="upload-btn">Submit for Verification</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="Manager-dashboard" class="page-section">
+    <div class="container" style="max-width: 900px;">
+        <h1>Manager Dashboard</h1>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <p class="subtitle" style="text-align: left; margin: 0;">Review and manage loan utilization submissions.</p>
+            <button class="action-btn btn-approve" onclick="startNewSubmission()" style="padding: 10px 20px; font-size: 1em; display: flex; align-items: center; gap: 5px;">
+                <i class="fas fa-plus"></i> New Submission
+            </button>
+        </div>
+        
+        <div class="dashboard-grid">
+            <div class="dashboard-card">
+                <h3>Pending Submissions</h3>
+                <p id="pending-count" style="font-size:2em; font-weight:700; color:#3498db; margin:0;">0</p>
+            </div>
+            <div class="dashboard-card">
+                <h3>AI Risk Alerts</h3>
+                <p id="risk-count" style="font-size:2em; font-weight:700; color:#e74c3c; margin:0;">0</p>
+            </div>
+        </div>
+
+        <div style="margin-top: 30px; overflow-x: auto;">
+            <h3 class="form-section-title">All Submissions</h3>
+            <table id="submissions-table" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th>Loan ID</th>
+                        <th>Full Name</th>
+                        <th>Aadhaar No.</th>
+                        <th>PAN No.</th>
+                        <th>Asset Type</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="submission-list">
+                </tbody>
+            </table>
+        </div>
+        <div style="margin-top: 20px;">
+            <a href="#" onclick="showPage('role-page')">Log Out</a>
+        </div>
+    </div>
+</div>
+
+<div id="state-agency-dashboard" class="page-section">
+    <div class="container" style="max-width: 1200px;">
+        <h1>State Agency/Bank Dashboard</h1>
+        <p class="subtitle">View and export all loan submissions.</p>
+        <div style="display: flex; justify-content: flex-end;">
+            <button class="export-btn" onclick="exportData()">Export to CSV</button>
+        </div>
+        <div id="agency-table-container">
+            <table id="all-submissions-table">
+                <thead>
+                    <tr>
+                        <th>Loan ID</th>
+                        <th>Full Name</th>
+                        <th>Aadhaar</th>
+                        <th>PAN</th>
+                        <th>Asset Type</th>
+                        <th>Status</th>
+                        <th>Timestamp</th>
+                        <th>Comments</th>
+                        <th>Media Link</th>
+                    </tr>
+                </thead>
+                <tbody id="all-submissions-list">
+                    <tr><td colspan="9" style="text-align:center;">Loading submissions...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div style="margin-top: 20px;">
+            <a href="#" onclick="showPage('role-page')">Log Out</a>
+        </div>
+    </div>
+</div>
+
+<div id="view-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+        <div id="modal-body-content">
+            </div>
+    </div>
+</div>
+
+<script>
+    let locationData = {}; 
+    let mediaFilesToUpload = [];
+    let ManagerUsername = ''; // Variable to store the logged-in user
+    let demoOtp = '4352'; // Demo OTP value
+
+    function setSubmitButtonState(state, message = 'Submit for Verification') {
+        const uploadButton = document.getElementById('upload-btn');
+        if (uploadButton) {
+            uploadButton.disabled = (state === 'submitting' || state === 'success');
+            uploadButton.textContent = message;
+            
+            if (state === 'success') {
+                uploadButton.style.backgroundColor = '#2ecc71'; 
+            } else if (state === 'error') {
+                uploadButton.style.backgroundColor = '#e74c3c'; 
+            } else {
+                uploadButton.style.backgroundColor = '#2563eb'; 
+            }
+        }
+    }
+
+
+    function showPage(pageId) {
+        document.querySelectorAll('.page-section').forEach(page => {
+            page.style.display = 'none';
+        });
+        const targetPage = document.getElementById(pageId);
+        if (targetPage) {
+            targetPage.style.display = 'flex';
+        }
+        if (pageId === 'Manager-dashboard') {
+            loadManagerDashboard();
+        }
+        if (pageId === 'state-agency-dashboard') {
+            loadStateAgencyDashboard();
+        }
+         if (pageId === 'upload-page') {
+             setSubmitButtonState('ready'); // Ensure button is ready when on upload page
+             getLocation(); // Start GPS acquisition
+        }
+    }
+
+    function selectRole(role) {
+        localStorage.setItem('userRole', role);
+        if (role === 'beneficiary') {
+            showPage('beneficiary-login-page');
+        } else if (role === 'state-agency') {
+            showPage('state-agency-login-page'); // Direct agency to new login page
+        } else {
+            showPage('Manager-login-page');
+        }
+    }
+    
+    // NEW FUNCTION: Clears session and shows profile form for manual Manager entry
+    function startNewSubmission() {
+        localStorage.removeItem('profileData');
+        document.getElementById('profile-form').reset();
+        showPage('profile-page');
+        alert("Manager: Please fill out the profile details for the new loan submission.");
+    }
+
+
+    // =======================================================
+    // === BENEFICIARY LOGIN LOGIC (Mobile/OTP) ===
+    // =======================================================
+
+    function sendDemoOTP() {
+        const mobile = document.getElementById('mobileLogin').value;
+        const otpMessage = document.getElementById('otp-message');
+        
+        // --- DEMO MOBILE NUMBER CHECK ---
+        if (mobile === '8883662469' || mobile === '9876543210' || mobile === '1234567890') { 
+            otpMessage.textContent = `Demo OTP (${demoOtp}) sent to ${mobile}. Please enter it below.`;
+            otpMessage.className = 'status-message status-ok';
+            document.getElementById('mobile-field').style.display = 'none';
+            document.getElementById('otp-field').style.display = 'block';
+            document.getElementById('otpInput').focus();
+        } else if (!mobile || mobile.length < 10) {
+             otpMessage.textContent = 'Please enter a valid 10-digit mobile number.';
+             otpMessage.className = 'status-message status-error';
+        } else {
+            otpMessage.textContent = `Error: Mobile number not registered for demo.`;
+            otpMessage.className = 'status-message status-error';
+        }
+    }
+
+    document.getElementById('beneficiary-login-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const otp = document.getElementById('otpInput').value;
+        const mobile = document.getElementById('mobileLogin').value;
+        const otpMessage = document.getElementById('otp-message');
+
+        // --- DEMO OTP VERIFICATION ---
+        if (otp === demoOtp && (mobile === '8883662469' || mobile === '9876543210' || mobile === '1234567890')) {
+            alert('Beneficiary Login successful!');
+            otpMessage.textContent = '';
+            showPage('profile-page'); 
+        } else {
+            otpMessage.textContent = 'Invalid OTP. Please try again.';
+            otpMessage.className = 'status-message status-error';
+        }
+    });
+
+    // =======================================================
+    // === MANAGER LOGIN LOGIC ===
+    // =======================================================
+    document.getElementById('Manager-login-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const username = document.getElementById('ManagerUsername').value;
+        const password = document.getElementById('ManagerPassword').value;
+        const role = localStorage.getItem('userRole');
+
+        ManagerUsername = username; 
+
+        if (role === 'Manager' && username === 'Manager' && password === 'MAN@87') {
+            alert('Manager Login successful!');
+            showPage('Manager-dashboard');
+        } else {
+            alert('Invalid username or password.');
+        }
+    });
+    
+    // =======================================================
+    // === STATE AGENCY/BANK LOGIN LOGIC ===
+    // =======================================================
+    document.getElementById('agency-login-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const username = document.getElementById('agencyUsername').value;
+        const password = document.getElementById('agencyPassword').value;
+        const role = localStorage.getItem('userRole');
+
+        // Agency Demo Credentials: ganeshan / 123456
+        if (role === 'state-agency' && username === 'ganeshan' && password === '123456') {
+            alert('State Agency Login successful!');
+            showPage('state-agency-dashboard');
+        } else {
+            alert('Invalid username or password.');
+        }
+    });
+    // =======================================================
+
+
+    document.getElementById('profile-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const profileData = {
+            fullName: document.getElementById('fullName').value,
+            mobileNumber: document.getElementById('mobileNumber').value,
+            aadharCard: document.getElementById('aadharCard').value,
+            panCard: document.getElementById('panCard').value,
+            governmentID: document.getElementById('governmentID').value,
+            gender: document.getElementById('gender').value,
+            dateOfBirth: document.getElementById('dob').value,
+            village: document.getElementById('village').value,
+            district: document.getElementById('district').value,
+            state: document.getElementById('state').value,
+            pincode: document.getElementById('pincode').value,
+            bankName: document.getElementById('bankName').value,
+            ifscCode: document.getElementById('ifscCode').value,
+            branchName: document.getElementById('branchName').value,
+            bankPincode: document.getElementById('bankPincode').value
+        };
+
+        for (const key in profileData) {
+            if (!profileData[key]) {
+                alert(`Please fill in the '${key}' field.`);
+                return;
+            }
+        }
+        
+        localStorage.setItem('profileData', JSON.stringify(profileData));
+
+        alert('Profile saved successfully! Redirecting to asset upload.');
+        getLocation();
+        showPage('upload-page');
+    });
+
+    function getLocation() {
+        const statusElement = document.getElementById('location-status');
+        if (navigator.geolocation) {
+            statusElement.textContent = 'Getting location...';
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    locationData = { lat: position.coords.latitude, lon: position.coords.longitude };
+                    statusElement.textContent = `Location acquired: Lat ${locationData.lat.toFixed(4)}, Lon ${locationData.lon.toFixed(4)}`;
+                    statusElement.classList.remove('status-error');
+                    statusElement.classList.add('status-ok');
+                },
+                (error) => {
+                    console.error("Geolocation error:", error);
+                    statusElement.textContent = 'Could not get location. Please enable GPS.';
+                    statusElement.classList.remove('status-ok');
+                    statusElement.classList.add('status-error');
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        } else {
+            statusElement.textContent = 'Geolocation is not supported by this browser.';
+            statusElement.classList.remove('status-ok');
+            statusElement.classList.add('status-error');
+        }
+    }
+    
+    function captureMedia() {
+        const mediaInput = document.getElementById('mediaInput');
+        mediaInput.setAttribute('capture', 'environment'); 
+        mediaInput.click();
+    }
+    
+    document.getElementById('upload-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const mediaInput = document.getElementById('mediaInput');
+        const documentInput = document.getElementById('documentInput');
+        
+        let file = mediaInput.files[0];
+        
+        if (!file && documentInput.files.length > 0) {
+             file = documentInput.files[0];
+        }
+
+        if (!file) {
+            alert('Please upload at least one photo, video, or document of the asset.');
+            return;
+        }
+        
+        const profileData = JSON.parse(localStorage.getItem('profileData'));
+        if (!profileData) {
+            alert('Profile data is missing. Please restart the process.');
+            return;
+        }
+
+        const timestamp = new Date().toISOString();
+        const assetData = {
+            assetType: document.getElementById('assetType').value,
+            assetDescription: document.getElementById('assetDescription').value
+        };
+
+        setSubmitButtonState('submitting', 'Processing file...');
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const base64Data = e.target.result.split(',')[1];
+            
+            const submissionData = {
+                profileData,
+                assetData,
+                location: locationData,
+                timestamp,
+                mediaFiles: {
+                    base64: base64Data,
+                    fileName: file.name
+                }
+            };
+
+            if (!navigator.onLine) {
+                let offlineSubs = JSON.parse(localStorage.getItem('offlineSubmissions') || '[]');
+                offlineSubs.push(submissionData);
+                localStorage.setItem('offlineSubmissions', JSON.stringify(offlineSubs));
+                alert('You are offline. Your submission has been saved and will sync automatically when you are back online.');
+                setSubmitButtonState('success', 'Saved Offline');
+                console.log('Saved for offline sync:', submissionData);
+                return;
+            }
+
+            sendSubmissionToBackend(submissionData);
+        };
+        reader.readAsDataURL(file);
+    });
+    
+    function sendSubmissionToBackend(submissionData) {
+        setSubmitButtonState('submitting', 'Uploading & Saving...');
+        google.script.run
+            .withSuccessHandler((msg) => {
+                alert('Submission successful: ' + msg);
+                setSubmitButtonState('success', 'Successfully Submitted ✅');
+                console.log('Backend response:', msg);
+                
+                setTimeout(() => {
+                    document.getElementById('upload-form').reset();
+                    if (document.getElementById('mediaInput')) document.getElementById('mediaInput').value = null; 
+                    if (document.getElementById('documentInput')) document.getElementById('documentInput').value = null;
+                    if (document.getElementById('media-preview')) document.getElementById('media-preview').innerHTML = '';
+                    if (document.getElementById('document-preview')) document.getElementById('document-preview').innerHTML = '';
+                    
+                    setSubmitButtonState('ready');
+                }, 3000);
+            })
+            .withFailureHandler((err) => {
+                alert('An error occurred during upload: ' + err.message);
+                setSubmitButtonState('error', 'Submission Failed ❌');
+                console.error('Backend error:', err);
+                setTimeout(() => {
+                    setSubmitButtonState('ready');
+                }, 3000);
+            })
+            .saveSubmission(submissionData);
+    }
+    
+    window.addEventListener('online', () => {
+        const offlineSubmissions = JSON.parse(localStorage.getItem('offlineSubmissions') || '[]');
+        if (offlineSubmissions.length > 0) {
+            alert(`You are back online! Syncing ${offlineSubmissions.length} offline submissions.`);
+            offlineSubmissions.forEach(submission => {
+                sendSubmissionToBackend(submission);
+            });
+            localStorage.removeItem('offlineSubmissions');
+        }
+    });
+
+    function loadManagerDashboard() {
+        google.script.run
+            .withSuccessHandler(renderManagerDashboard)
+            .withFailureHandler(err => {
+                console.error("Failed to load submissions:", err);
+                alert("Failed to load submissions: " + err.message);
+                document.getElementById('submission-list').innerHTML = `<tr><td colspan="7" style="text-align:center; color:#e74c3c;">Failed to load data. Please try again.</td></tr>`;
+            })
+            .getSubmissions();
+    }
+
+    function renderManagerDashboard(data) {
+        const tableBody = document.getElementById('submission-list');
+        tableBody.innerHTML = '';
+        
+        if (!data || data.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;">No submissions found.</td></tr>`;
+            document.getElementById('pending-count').textContent = 0;
+            document.getElementById('risk-count').textContent = 0;
+            return;
+        }
+
+        let pendingCount = 0;
+        let riskCount = 0;
+        
+        data.forEach(row => {
+            if (row.Status === 'Pending') pendingCount++;
+            if (row['AI Risk Level'] && row['AI Risk Level'].toLowerCase() !== 'normal' && row['AI Risk Level'] !== '') riskCount++; 
+            
+            const newRow = tableBody.insertRow();
+            newRow.innerHTML = `
+                <td>${row['Submission ID']}</td>
+                <td style="font-weight: 600;">${row['Full Name']}</td>
+                <td>${row['Aadhaar Card No.']}</td>
+                <td>${row['PAN Card No.']}</td>
+                <td>${row['Asset Type']}</td>
+                <td><span class="status-pill status-${row.Status.toLowerCase()}">${row.Status}</span></td>
+                <td>
+                    <button class="action-btn btn-view" onclick="viewSubmissionDetails('${row['Submission ID']}')">View</button>
+                    <button class="action-btn btn-delete" onclick="deleteSubmission('${row['Submission ID']}')">Delete</button>
+                </td>
+            `;
+        });
+        
+        document.getElementById('pending-count').textContent = pendingCount;
+        document.getElementById('risk-count').textContent = riskCount;
+    }
+
+    function loadStateAgencyDashboard() {
+        google.script.run
+            .withSuccessHandler(renderStateAgencyDashboard)
+            .withFailureHandler(err => {
+                console.error("Failed to load submissions for agency:", err);
+                document.getElementById('all-submissions-list').innerHTML = `<tr><td colspan="9" style="text-align:center; color:#e74c3c;">Failed to load data. Please check your script and sheet.</td></tr>`;
+            })
+            .getAllSubmissions();
+    }
+
+    function renderStateAgencyDashboard(data) {
+        const tableBody = document.getElementById('all-submissions-list');
+        tableBody.innerHTML = '';
+
+        if (!data || data.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="9" style="text-align:center;">No submissions found.</td></tr>`;
+            return;
+        }
+
+        data.forEach(row => {
+            const newRow = tableBody.insertRow();
+            newRow.innerHTML = `
+                <td>${row['Submission ID']}</td>
+                <td>${row['Full Name']}</td>
+                <td>${row['Aadhaar Card No.']}</td>
+                <td>${row['PAN Card No.']}</td>
+                <td>${row['Asset Type']}</td>
+                <td><span class="status-pill status-${row.Status.toLowerCase()}">${row.Status}</span></td>
+                <td>${row.Timestamp}</td>
+                <td>${row.Comments || 'N/A'}</td>
+                <td><a href="${row['Media URL']}" target="_blank">View Media</a></td>
+            `;
+        });
+    }
+
+    const modal = document.getElementById('view-modal');
+    
+    function viewSubmissionDetails(submissionId) {
+        google.script.run
+            .withSuccessHandler(submission => {
+                if (submission) {
+                    const modalBody = document.getElementById('modal-body-content');
+                    let location = { lat: 'N/A', lon: 'N/A' }; 
+                    try {
+                        location = JSON.parse(submission.Location);
+                    } catch(e) {
+                        console.warn("Could not parse location data:", submission.Location);
+                    }
+
+                    modalBody.innerHTML = `
+                        <h2>Submission Details for ID: ${submission['Submission ID']}</h2>
+                        <div class="modal-body-content">
+                            <p><strong>Full Name:</strong> ${submission['Full Name']}</p>
+                            <p><strong>Mobile:</strong> ${submission['Mobile Number']}</p>
+                            <p><strong>Aadhaar Card No:</strong> ${submission['Aadhaar Card No.']}</p>
+                            <p><strong>PAN Card No:</strong> ${submission['PAN Card No.']}</p>
+                            <p><strong>Asset Type:</strong> ${submission['Asset Type']}</p>
+                            <p><strong>Description:</strong> ${submission['Asset Description']}</p>
+                            <p><strong>Status:</strong> <span class="status-pill status-${submission.Status.toLowerCase()}">${submission.Status}</span></p>
+                            <p><strong>Date & Time:</strong> ${submission.Timestamp}</p>
+                            <p><strong>Geo Location:</strong> Lat ${location.lat ? location.lat.toFixed(4) : 'N/A'}, Lon ${location.lon ? location.lon.toFixed(4) : 'N/A'}</p>
+                            <p><strong>Last Updated By:</strong> ${submission['Last Updated By'] || 'N/A'}</p>
+                        </div>
+                        
+                        <h4 style="margin-top: 20px;">Uploaded Media:</h4>
+                        <div class="modal-media-preview">
+                            <a href="${submission['Media URL']}" target="_blank">
+                                <img src="${submission['Media URL']}" alt="Uploaded Asset" style="max-width: 100%; height: auto;"/>
+                            </a>
+                        </div>
+                        
+                        <h4 style="margin-top: 20px;">Officer Actions:</h4>
+                        <div class="review-actions">
+                            <textarea id="officer-comments" placeholder="Enter comments here..." style="width: 100%; height: 80px; margin-bottom: 10px;">${submission.Comments || ''}</textarea>
+                            <div style="display: flex; gap: 10px;">
+                                <button class="action-btn btn-approve" style="flex-grow: 1;" onclick="reviewAndComment('${submission['Submission ID']}', 'Approved')">Approve</button>
+                                <button class="action-btn btn-reject" style="flex-grow: 1;" onclick="reviewAndComment('${submission['Submission ID']}', 'Rejected')">Reject</button>
+                            </div>
+                        </div>
+                    `;
+                    document.getElementById('view-modal').style.display = 'block';
+                } else {
+                    alert('Submission details not found.');
+                }
+            })
+            .withFailureHandler(err => {
+                alert('An error occurred while fetching details: ' + err.message);
+            })
+            .getSubmissionDetails(submissionId); 
+    }
+    
+    function closeModal() {
+        const modal = document.getElementById('view-modal');
+        modal.style.display = 'none';
+    }
+    
+    function reviewAndComment(submissionId, action) {
+        const comments = document.getElementById('officer-comments').value;
+        if (!comments) {
+            alert('Please enter a comment before submitting.');
+            return;
+        }
+
+        if (!ManagerUsername) {
+            alert('Manager session expired. Please log in again.');
+            return;
+        }
+        
+        google.script.run
+            .withSuccessHandler(msg => {
+                alert(msg);
+                closeModal();
+                loadManagerDashboard(); 
+            })
+            .withFailureHandler(err => {
+                alert('Error updating submission: ' + err.message);
+            })
+            .updateSubmission(submissionId, action, comments, ManagerUsername); 
+    }
+    
+    function deleteSubmission(submissionId) {
+        if (confirm(`Are you sure you want to delete submission ID: ${submissionId}?`)) {
+            google.script.run
+                .withSuccessHandler(msg => {
+                    alert(msg);
+                    loadManagerDashboard();
+                })
+                .withFailureHandler(err => {
+                    alert('Error deleting submission: ' + err.message);
+                })
+                .deleteSubmission(submissionId);
+        }
+    }
+
+    function exportData() {
+        alert("Exporting data to CSV. This may take a moment...");
+        google.script.run
+            .withSuccessHandler(fileUrl => {
+                if (fileUrl.startsWith('http')) {
+                    window.open(fileUrl, '_blank');
+                } else {
+                    alert(fileUrl);
+                }
+            })
+            .withFailureHandler(err => {
+                alert('Export failed: ' + err.message);
+            })
+            .exportSubmissionsAsCsv();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        showPage('role-page');
+    });
+
+</script>
+</body>
+</html>

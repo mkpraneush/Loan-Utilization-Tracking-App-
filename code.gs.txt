@@ -1,0 +1,286 @@
+// =========================================================================
+// === SPREADSHEET & FILE CONSTANTS ========================================
+// =========================================================================
+
+// UPDATED SPREADSHEET ID
+const SPREADSHEET_ID = '1z-NFF5NC-L6CGAqNJ6dR9jFL7Sng1Bg_0AuobQwGMOg'; 
+
+// DRIVE FOLDER ID
+const UPLOAD_FOLDER_ID = '10fiXHnuihdByxpceEpZ6Rbb4AtHadOXV'; 
+
+/**
+ * Serves the HTML file for the web app.
+ * @return {HtmlOutput} The HTML content to be served.
+ */
+function doGet() {
+  return HtmlService.createHtmlOutputFromFile('index');
+}
+
+/**
+ * Saves a new loan verification submission.
+ * @param {Object} submissionData An object containing all submission data.
+ * @return {string} A success message.
+ */
+function saveSubmission(submissionData) {
+  try {
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Submissions');
+    if (!sheet) {
+      throw new Error("Sheet 'Submissions' not found. Please create it with headers.");
+    }
+
+    // Decode the Base64 file data and create a blob.
+    const fileContent = submissionData.mediaFiles.base64;
+    const fileName = submissionData.mediaFiles.fileName;
+    const fileBlob = Utilities.newBlob(Utilities.base64Decode(fileContent), 'application/octet-stream', fileName);
+
+    // Get the destination folder.
+    const folder = DriveApp.getFolderById(UPLOAD_FOLDER_ID);
+    if (!folder) {
+        throw new Error("Upload folder not found. Check the folder ID.");
+    }
+
+    // Create a new file in the folder.
+    const uploadedFile = folder.createFile(fileBlob);
+    const fileUrl = uploadedFile.getUrl();
+
+    // Get the last row number and increment it for the new entry.
+    const lastRow = sheet.getLastRow();
+    const submissionId = `SUB-${lastRow + 1}`;
+
+    // Prepare the data to be written to the Google Sheet (25 columns required).
+    const rowData = [
+      submissionId,
+      submissionData.profileData.fullName,
+      submissionData.profileData.mobileNumber,
+      submissionData.profileData.aadharCard,
+      submissionData.profileData.panCard,
+      submissionData.profileData.governmentID,
+      submissionData.profileData.gender,
+      submissionData.profileData.dateOfBirth,
+      submissionData.profileData.village,
+      submissionData.profileData.district,
+      submissionData.profileData.state,
+      submissionData.profileData.pincode,
+      submissionData.profileData.bankName,
+      submissionData.profileData.ifscCode,
+      submissionData.profileData.branchName,
+      submissionData.profileData.bankPincode,
+      submissionData.assetData.assetType,
+      submissionData.assetData.assetDescription,
+      JSON.stringify(submissionData.location),
+      submissionData.timestamp,
+      fileUrl,
+      'Pending',
+      'Normal',
+      '',
+      ''
+    ];
+
+    sheet.appendRow(rowData);
+    return `Submission ${submissionId} saved successfully! File URL: ${fileUrl}`;
+
+  } catch (e) {
+    console.error('Error saving submission:', e);
+    const message = e.message.includes('MimeType') ? e.message + ". Check MIME type or set it to 'application/octet-stream'." : e.message;
+    throw new Error('Could not save submission: ' + message);
+  }
+}
+
+/**
+ * Retrieves all loan submissions for the dashboard.
+ * @return {Object[]} An array of submission objects.
+ */
+function getSubmissions() {
+  try {
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Submissions');
+    if (!sheet) {
+      return [];
+    }
+    
+    const dataRange = sheet.getDataRange();
+    const values = dataRange.getValues();
+    
+    if (values.length <= 1) {
+      return [];
+    }
+    
+    const headers = values[0].map(h => h.trim());
+    const submissions = [];
+
+    for (let i = 1; i < values.length; i++) {
+      const row = values[i];
+      const submission = {};
+
+      for (let j = 0; j < headers.length; j++) {
+        submission[headers[j]] = row[j];
+      }
+      submissions.push(submission);
+    }
+    return submissions;
+
+  } catch (e) {
+    console.error('Error getting submissions:', e);
+    return [];
+  }
+}
+
+/**
+ * Retrieves the details of a single loan submission by its ID.
+ * (Used by the View modal)
+ * @param {string} submissionId The ID of the submission to retrieve.
+ * @return {Object|null} The submission object or null if not found.
+ */
+function getSubmissionDetails(submissionId) {
+  try {
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Submissions');
+    if (!sheet) {
+      throw new Error("Sheet 'Submissions' not found.");
+    }
+    const dataRange = sheet.getDataRange();
+    const values = dataRange.getValues();
+    
+    if (values.length <= 1) return null;
+
+    const headers = values[0].map(h => h.trim());
+
+    for (let i = 1; i < values.length; i++) {
+      if (values[i][0] === submissionId) {
+        const submission = {};
+        for (let j = 0; j < headers.length; j++) {
+          submission[headers[j]] = values[i][j];
+        }
+        return submission;
+      }
+    }
+    return null;
+    
+  } catch (e) {
+    console.error('Error getting submission details:', e);
+    throw new Error('Could not retrieve submission details: ' + e.message);
+  }
+}
+
+/**
+ * Updates the status, comments, and last updated user for a specific submission.
+ * @param {string} submissionId The ID of the submission to update.
+ * @param {string} status The new status ('Approved' or 'Rejected').
+ * @param {string} comments The Manager's comments.
+ * @param {string} updatedBy The Manager's username.
+ * @return {string} A success message.
+ */
+function updateSubmission(submissionId, status, comments, updatedBy) {
+  try {
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Submissions');
+    if (!sheet) {
+      throw new Error("Sheet 'Submissions' not found.");
+    }
+    const dataRange = sheet.getDataRange();
+    const values = dataRange.getValues();
+    let rowToUpdate = -1;
+
+    for (let i = 1; i < values.length; i++) {
+      if (values[i][0] === submissionId) {
+        rowToUpdate = i + 1;
+        break;
+      }
+    }
+
+    if (rowToUpdate === -1) {
+      throw new Error(`Submission with ID ${submissionId} not found.`);
+    }
+
+    const headers = values[0];
+    const statusIndex = headers.indexOf('Status') + 1;
+    const commentsIndex = headers.indexOf('Comments') + 1;
+    const updatedByIndex = headers.indexOf('Last Updated By') + 1;
+
+    sheet.getRange(rowToUpdate, statusIndex).setValue(status);
+    sheet.getRange(rowToUpdate, commentsIndex).setValue(comments);
+    sheet.getRange(rowToUpdate, updatedByIndex).setValue(updatedBy);
+
+    return `Submission ${submissionId} updated to ${status} by ${updatedBy}.`;
+
+  } catch (e) {
+    console.error('Error updating submission:', e);
+    throw new Error('Could not update submission: ' + e.message);
+  }
+}
+
+/**
+ * Deletes a submission based on its ID.
+ */
+function deleteSubmission(submissionId) {
+  try {
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Submissions');
+    if (!sheet) {
+      throw new Error("Sheet 'Submissions' not found.");
+    }
+    
+    const dataRange = sheet.getDataRange();
+    const values = dataRange.getValues();
+    let rowToDelete = -1;
+    
+    for (let i = 1; i < values.length; i++) {
+      if (values[i][0] === submissionId) {
+        rowToDelete = i + 1;
+        break;
+      }
+    }
+    
+    if (rowToDelete === -1) {
+      throw new Error(`Submission with ID ${submissionId} not found.`);
+    }
+    
+    sheet.deleteRow(rowToDelete);
+    
+    return `Submission ${submissionId} deleted successfully.`;
+    
+  } catch (e) {
+    console.error('Error deleting submission:', e);
+    throw new Error('Could not delete submission: ' + e.message);
+  }
+}
+
+/**
+ * Retrieves all submissions for the state agency dashboard.
+ */
+function getAllSubmissions() {
+  return getSubmissions();
+}
+
+/**
+ * Creates and returns a CSV file of all submissions.
+ */
+function exportSubmissionsAsCsv() {
+  try {
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Submissions');
+    if (!sheet) {
+      throw new Error("Sheet 'Submissions' not found.");
+    }
+
+    const data = sheet.getDataRange().getValues();
+    if (data.length === 0) {
+      return "No data to export.";
+    }
+
+    const csvContent = data.map(row => 
+      row.map(cell => {
+        let escapedCell = (typeof cell === 'string') ? cell.replace(/"/g, '""') : cell;
+        if (escapedCell.toString().includes(',') || escapedCell.toString().includes('"')) {
+          escapedCell = `"${escapedCell}"`;
+        }
+        return escapedCell;
+      }).join(',')
+    ).join('\n');
+
+    const fileName = `Loan_Submissions_Export_${new Date().toISOString().slice(0, 10)}.csv`;
+    const folder = DriveApp.getFolderById(UPLOAD_FOLDER_ID);
+    const csvFile = folder.createFile(fileName, csvContent, MimeType.CSV);
+
+    return csvFile.getUrl();
+
+  } catch (e) {
+    console.error('Error exporting submissions:', e);
+    throw new Error('Could not export data: ' + e.message);
+  }
+}
